@@ -20,17 +20,25 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
     // this function create a square for the chess board, give it color and adds piece
     const addPiece = (row, col, piece) => {
         const square = document.createElement('div'); // square is a new div element representing a single square
-        const colorClass = (row + col) % 2 === 0 ? 'green' : 'light green';
-        square.className = colorClass;
-        if (piece) {
-            const pieceElement = document.createElement('span');
+        const colorClass = (row + col) % 2 === 0 ? 'black' : 'white';
+        square.className = colorClass; // determine the square color
+        if (piece) {// if there is a piece to place 
+            const pieceElement = document.createElement('span');// a span element is created 
             pieceElement.innerHTML = pieces[piece];
-            pieceElement.className = 'piece';
-            square.appendChild(pieceElement);
+            pieceElement.className = 'piece';// the symbole for the piece is place inside of the span using the pieces object 
+           
+            if (row === 0 || row === 1) {
+                pieceElement.classList.add('black-piece');
+            } else {
+                pieceElement.classList.add('white-piece');
+            }
+           
+           
+            square.appendChild(pieceElement);// the span is add to the square
         }
-        board.appendChild(square);
+        board.appendChild(square);// the square with or without is a piece is add to the board
     };
-
+//  this nesed loop go through row and column of the chessboard adding the piece function at the position from the initialBoard array 
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             addPiece(row, col, initialBoard[row][col]);
