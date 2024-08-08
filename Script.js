@@ -22,10 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
         const square = document.createElement('div'); // square is a new div element representing a single square
         const colorClass = (row + col) % 2 === 0 ? 'black' : 'white';
         square.className = colorClass; // determine the square color
+       
         if (piece) {// if there is a piece to place 
             const pieceElement = document.createElement('span');// a span element is created 
-            pieceElement.innerHTML = pieces[piece];
+            pieceElement.innerHTML = pieces[piece];// means that the inner HTML content of the pieceElement (which is a span element) is set to the corresponding Unicode character from the pieces object.
             pieceElement.className = 'piece';// the symbole for the piece is place inside of the span using the pieces object 
+           
            
             if (row === 0 || row === 1) {
                 pieceElement.classList.add('black-piece');
@@ -44,4 +46,20 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
             addPiece(row, col, initialBoard[row][col]);
         }
     }
-});
+
+    let draggerPiece = null
+
+    document.addEventListener('dragstart', (event) => {
+        if (event.target.classList.contains('piece')) {
+            draggedPiece = event.target;
+            event.target.classList.add('dragging');
+        }
+    });
+
+    document.addEventListener('dragstar', (event) => {
+        if (event.target,classList.contains('piece')){
+            event.target,classList.remove('dragging');
+        }
+    });
+
+    
