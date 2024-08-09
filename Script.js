@@ -1,5 +1,5 @@
-document.addEventListener("DOMContentLoaded", () => {// set up an event listener to wait for the HTML file to be loaded.
-    const board = document.querySelector('.chess-board');// select the HTML element  with the class chess-board and stores it in the varaible board.
+document.addEventListener("DOMContentLoaded", () => {
+    const board = document.querySelector('.chess-board');
     const pieces = {
         'king': '♔',
         'queen': '♕',
@@ -19,71 +19,63 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
     };
 
     let kingposition = {
-        'white': {row: 7, col: 4},//Intital position of the king.
-        'black': {row: 0, col: 4},// Initianl position of the black king
+        'white': { row: 7, col: 4 },
+        'black': { row: 0, col: 4 }
     };
 
-    const initialBoard = [ // this array reppresent the initiall layout of the chess board
-
+    const initialBoard = [
         ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'],
         ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
         [], [], [], [],
         ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
         ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook']
     ];
-    // this function create a square for the chess board, give it color and adds piece.
+
     const addPiece = (row, col, piece) => {
-        const square = document.createElement('div');// square is a new div element representing a single square.
+        const square = document.createElement('div');
         const colorClass = (row + col) % 2 === 0 ? 'black' : 'white';
-        square.className = colorClass; // determine the square color
+        square.className = colorClass;
         square.dataset.row = row;
         square.dataset.col = col;
-          
-        // if there is a piece to place 
+
         if (piece) {
-            const pieceElement = document.createElement('span');;// a span element is created 
-        // means that the inner HTML content of the pieceElement (which is a span element) is set to the corresponding Unicode character from the pieces object.    
+            const pieceElement = document.createElement('span');
             pieceElement.innerHTML = pieces[piece];
-        // the symbole for the piece is place inside of the span using the pieces object 
             pieceElement.className = 'piece';
             pieceElement.draggable = true;
 
-        // determine the piece(span) color.
             if (row === 0 || row === 1) {
                 pieceElement.classList.add('black-piece');
             } else {
                 pieceElement.classList.add('white-piece');
             }
 
+            square.appendChild(pieceElement);
 
-            square.appendChild(pieceElement);// the span is add to the square
-            
-            if(piece === 'king'){
-                kingposition[(row === 7? 'white' : 'black')] = {row, col};
+            if (piece === 'king') {
+                kingposition[(row === 7 ? 'white' : 'black')] = { row, col };
             }
-        
         }
-        board.appendChild(square);;// the square with or without is a piece is add to the board
+        board.appendChild(square);
     };
-//  this nesed loop go through row and column of the chessboard adding the piece function at the position from the initialBoard array.
+
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             addPiece(row, col, initialBoard[row][col]);
         }
     }
-         // Move vlaidation function
+
     const isValidMove = (pieceUnicode, fromRow, fromCol, toRow, toCol) => {
-        // Map the Unicode character to the piece name
         const piece = pieceMap[pieceUnicode];
         switch (piece) {
-            case 'pawn': // Determine which way the pawn should move
+            case 'pawn':
                 const direction = (fromRow < 4) ? 1 : -1;
                 if (fromCol === toCol && (toRow === fromRow + direction || (fromRow === 1 || fromRow === 6) && toRow === fromRow + 2 * direction)) {
                     return true;
                 }
                 break;
             case 'knight':
-                if (Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 1 || Math.abs(fromRow - toRow) === 1 && Math.abs(fromCol - toCol) === 2) {
+                if ((Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 1) || (Math.abs(fromRow - toRow) === 1 && Math.abs(fromCol - toCol) === 2)) {
                     return true;
                 }
                 break;
@@ -114,71 +106,65 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
     };
 
     const isKingInCheck = (color) => {
-        const kingposition = kingposition[color];
+        const kingPosition = kingposition[color];
         const opponentPieces = document.querySelectorAll(`.${color === 'white' ? 'black-piece' : 'white-piece'}`);
 
-        for (let piece of opponentPieces){
-            const fromRow = parentInt(piece.parentElement.dataset.row);
-            const fromCol = parentInt(piece,parentElement.da.col);
-            if(isValidMove(piece.innerHTML.trim(), fromRow,fromCol,kingposition.row, kingposition.col)){
-
+        for (let piece of opponentPieces) {
+            const fromRow = parseInt(piece.parentElement.dataset.row);
+            const fromCol = parseInt(piece.parentElement.dataset.col);
+            if (isValidMove(piece.innerHTML.trim(), fromRow, fromCol, kingPosition.row, kingPosition.col)) {
+                return true;
             }
-        
-            return false;
+        }
+        return false;
     };
 
     const getAllmoves = (color) => {
-        const allmoves = {};
+        const allmoves = [];
         const pieces = document.querySelectorAll(`.${color === 'white' ? 'white-piece' : 'black-piece'}`);
 
-        for(let piece of pieces){
-            const fromRow = parentInt(piece.parentElement.dataset.row);
-            const fromCol = parent(piece.parentElement.dataset.col);
+        for (let piece of pieces) {
+            const fromRow = parseInt(piece.parentElement.dataset.row);
+            const fromCol = parseInt(piece.parentElement.dataset.col);
 
-            for(let row =0; row < 8; row++){
-                for(let col = 0; col <8; col++){
-                    if (isValidMove(piece.innerHTML.trim(), fromRow,fromCol, row, col)){
-                        allmoves.push({fromRow, fromCol, toRow: row, toCol: col});
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (isValidMove(piece.innerHTML.trim(), fromRow, fromCol, row, col)) {
+                        allmoves.push({ fromRow, fromCol, toRow: row, toCol: col });
                     }
                 }
             }
-               
         }
         return allmoves;
     };
 
-    const ischeckmate = color => {
-        if (! isKingInCheck(color)) return false;
+    const isCheckmate = (color) => {
+        if (!isKingInCheck(color)) return false;
         const allmoves = getAllmoves(color);
 
-        for(let move of allmoves){
+        for (let move of allmoves) {
             const pieceElement = document.querySelector(`[data-row="${move.fromRow}"][data-col="${move.fromCol}"] .piece`);
             const targetSquare = document.querySelector(`[data-row="${move.toRow}"][data-col="${move.toCol}"]`);
             const targetPiece = targetSquare.querySelector('.piece');
 
-            targetSquare.appendChild(pieceElement);// simulate the move
-            if(!isKingInCheck(color)){
-                targetSquare.innerHTML= '';// undo the move
-                if(targetPiece)targetSquare.appendChild(targetPiece); //Restore the capture piece
+            targetSquare.appendChild(pieceElement); // simulate the move
+            if (!isKingInCheck(color)) {
+                targetSquare.innerHTML = ''; // undo the move
+                if (targetPiece) targetSquare.appendChild(targetPiece); // restore the captured piece
+                return false;
             }
-            targetSquare.innerHTML = ''; // undo to move
-            if(targetPiece)targetSquare.appendChild(targetPiece);// restore the capture piece
-
+            targetSquare.innerHTML = ''; // undo the move
+            if (targetPiece) targetSquare.appendChild(targetPiece); // restore the captured piece
         }
         return true;
-
     };
 
     const isStalemate = (color) => {
-        if(isKingInCheck(color)) 
-            return false;
+        if (isKingInCheck(color)) return false;
         const allmoves = getAllmoves(color);
-        return allmoves.length ===0; 
+        return allmoves.length === 0;
     };
 
-    
- 
-    // drag and drop functionalities.  
     let draggedPiece = null;
     let fromRow, fromCol;
 
@@ -211,20 +197,19 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
                 event.target.innerHTML = '';
                 event.target.appendChild(draggedPiece);
 
-                if (draggedPiece.innerHTML.trim() === pieces['king']){
-                    kingposition[draggedPiece.classList.contains('white-piece')? 'white': 'black'] = { row: toRow, col:toCol};
+                if (draggedPiece.innerHTML.trim() === pieces['king']) {
+                    kingposition[draggedPiece.classList.contains('white-piece') ? 'white' : 'black'] = { row: toRow, col: toCol };
                 }
 
-                if(isKingInCheck(draggedPiece.classList.contains('white-piece')? 'black': 'white')){
-                    if(ischeckmate(draggedPiece.classList.contains('white-piece'))){
-                        alert('checkmate');
-                }else{
-                    alert('check');
+                if (isKingInCheck(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
+                    if (isCheckmate(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
+                        alert('Checkmate!');
+                    } else {
+                        alert('Check!');
+                    }
+                } else if (isStalemate(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
+                    alert('Stalemate!');
                 }
-            }else if(isStalemate(draggedPiece.classList.contains('white-piece')? 'black' : ' white')){
-                alert('Stalemate!');
-            }
-
 
                 draggedPiece = null;
             } else {
@@ -233,3 +218,5 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
         }
     });
 });
+
+
