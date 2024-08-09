@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
     // Move validation function
     const isValidMove = (pieceUnicode, fromRow, fromCol, toRow, toCol) => {
      // Map the Unicode character to the piece name
-        const piece = pieceMap[pieceUnicode];
+        const piece = pieceMap[pieceUnicode];// the pieceUnicode is the king symbole which is look up in the piecemap to find the coorect value nd assign it to peiace variabe
         switch (piece) {
             case 'pawn':// Determine which way the pawn should go
                 const direction = (fromRow < 4) ? 1 : -1;
@@ -198,21 +198,42 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
     document.addEventListener('dragover', (event) => {
         event.preventDefault();
     });
-
+    
+        //this event is triggered when a piece is dropped onto a square on the chessboard
     document.addEventListener('drop', (event) => {
-        event.preventDefault();
+        event.preventDefault();// stop the browser from excuting it's default behavior
+
+        // the statement check if the target square is either blck or white make sure the piece is dropping on the valid square
         if (event.target.classList.contains('black') || event.target.classList.contains('white')) {
             const toRow = parseInt(event.target.dataset.row);
-            const toCol = parseInt(event.target.dataset.col);
+            const toCol = parseInt(event.target.dataset.col);//the torow and tocol var store the row and col id at the target square retrieve from the target square'data attributes 
+            
+            // this code check if the dragged piece is being move ans if the move is valid according to the chess rule
+            if (draggedPiece && isValidMove(draggedPiece.innerHTML.trim(), fromRow, fromCol, toRow, toCol)) {  // retrieve the HTML content of the dragged piece, which the unicode chart representing the piece. the trim() removes any whitespace around the piece's chart to ensure an exact match
+                   
+                // Check if the target square has an openent's piece
+                const targetSquare = document.querySelector(`[data-row="${toRow}"][data-col="${toCol}"]`);;// finding the row and col where the piece is being drop using the row and col coordinate
+                const targetPiece = targetSquare.querySelector('.piece');// chck if there is already a piece on the target square by looking for the element with the class piece in the target square
+                
+                //the statement check if target piece exits and if it belong to the openent
+                if (targetPiece &&
+                    ((draggedPiece.classList.contains('white-piece') && targetPiece.classList.contains('black-piece')) ||// chck if the the piece being drag is a white piece and if the piece currently on the target square ia a black piece.
+                        (draggedPiece.classList.contains('black-piece') && targetPiece.classList.contains('white-piece')))) { // vice versa
+                       
+                    // if the condition are meet capture the opponent's piec
+                    targetSquare.removeChild(targetPiece);
+                }
+                  //Move the dragged piece to the target square 
+                targetSquare.appendChild(draggedPiece);
+                  
 
-            if (draggedPiece && isValidMove(draggedPiece.innerHTML.trim(), fromRow, fromCol, toRow, toCol)) {
-                event.target.innerHTML = '';
-                event.target.appendChild(draggedPiece);
 
-                if (draggedPiece.innerHTML.trim() === pieces['king']) {
+                //check if the peice being move is the king
+                if (draggedPiece.innerHTML.trim() === pieces['king']) { // retrieve the HTML content of the dragged piece, which the unicode chart representing the piece. the trim() removes any whitespace around the piece's chart to ensure an exact match
+                    // chek which white or blck is being move and updates the king's position with new coardinate after the move
                     kingposition[draggedPiece.classList.contains('white-piece') ? 'white' : 'black'] = { row: toRow, col: toCol };
                 }
-
+                 // chck if the move made by the player puts the opponent's King in chck  
                 if (isKingInCheck(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
                     if (isCheckmate(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
                         alert('Checkmate!');
@@ -222,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
                 } else if (isStalemate(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
                     alert('Stalemate!');
                 }
-
+                  //Reset the drage piece to null 
                 draggedPiece = null;
             } else {
                 alert('Invalid move');
@@ -230,5 +251,3 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
         }
     });
 });
-
-
