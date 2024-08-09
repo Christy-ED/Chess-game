@@ -1,6 +1,6 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const board = document.querySelector('.chess-board');
-    const pieces = {
+document.addEventListener("DOMContentLoaded", () => {// set up an event listener to wait for the HTML file to be loaded.
+    const board = document.querySelector('.chess-board'); // select the HTML element  with the class chess-board and stores it in the varaible board
+     const pieces = {
         'king': '♔',
         'queen': '♕',
         'rook': '♖',
@@ -19,11 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     let kingposition = {
-        'white': { row: 7, col: 4 },
-        'black': { row: 0, col: 4 }
+        'white': { row: 7, col: 4 },//Intital position of the king
+        'black': { row: 0, col: 4 },// Initianl position of the black king
     };
 
-    const initialBoard = [
+    // this array reppresent the initiall layout of the chess board
+    const initialBoard = [ 
         ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'],
         ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
         [], [], [], [],
@@ -31,50 +32,59 @@ document.addEventListener("DOMContentLoaded", () => {
         ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook']
     ];
 
+
+      // this function create a square for the chess board, give it color and adds piece.
     const addPiece = (row, col, piece) => {
-        const square = document.createElement('div');
+        const square = document.createElement('div');// square is a new div element representing a single square.
         const colorClass = (row + col) % 2 === 0 ? 'black' : 'white';
-        square.className = colorClass;
+        square.className = colorClass;// determine the square color
         square.dataset.row = row;
         square.dataset.col = col;
 
+         // if there is a piece to place 
         if (piece) {
-            const pieceElement = document.createElement('span');
+            const pieceElement = document.createElement('span');// a span element is created 
+          // means that the inner HTML content of the pieceElement (which is a span element) is set to the corresponding Unicode character from the pieces object.    
             pieceElement.innerHTML = pieces[piece];
+             // the symbole for the piece is place inside of the span using the pieces object 
             pieceElement.className = 'piece';
             pieceElement.draggable = true;
 
+
+              // determine the piece(span) color.
             if (row === 0 || row === 1) {
                 pieceElement.classList.add('black-piece');
             } else {
                 pieceElement.classList.add('white-piece');
             }
 
-            square.appendChild(pieceElement);
+            square.appendChild(pieceElement);// the span is add to the square
 
             if (piece === 'king') {
                 kingposition[(row === 7 ? 'white' : 'black')] = { row, col };
             }
         }
-        board.appendChild(square);
+        board.appendChild(square);// the square with or without is a piece is add to the board
     };
 
+    //  this nesed loop go through row and column of the chessboard adding the piece function at the position from the initialBoard array.
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             addPiece(row, col, initialBoard[row][col]);
         }
     }
-
+    // Move validation function
     const isValidMove = (pieceUnicode, fromRow, fromCol, toRow, toCol) => {
+     // Map the Unicode character to the piece name
         const piece = pieceMap[pieceUnicode];
         switch (piece) {
-            case 'pawn':
+            case 'pawn':// Determine which way the pawn should go
                 const direction = (fromRow < 4) ? 1 : -1;
                 if (fromCol === toCol && (toRow === fromRow + direction || (fromRow === 1 || fromRow === 6) && toRow === fromRow + 2 * direction)) {
                     return true;
                 }
                 break;
-            case 'knight':
+            case 'knight'://Determine which way the knight shoud go
                 if ((Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 1) || (Math.abs(fromRow - toRow) === 1 && Math.abs(fromCol - toCol) === 2)) {
                     return true;
                 }
@@ -165,6 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return allmoves.length === 0;
     };
 
+    
+    // drag and drop functionalities.  
     let draggedPiece = null;
     let fromRow, fromCol;
 
