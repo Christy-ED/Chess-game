@@ -18,6 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
         '♙': 'pawn'
     };
 
+    let kingposition = {
+        'white': {row: 7, col: 4},//Intital position of the king.
+        'black': {row: 0, col: 4},// Initianl position of the black king
+    };
+
     const initialBoard = [ // this array reppresent the initiall layout of the chess board
 
         ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'],
@@ -43,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
             pieceElement.className = 'piece';
             pieceElement.draggable = true;
 
+        // determine the piece(span) color.
             if (row === 0 || row === 1) {
                 pieceElement.classList.add('black-piece');
             } else {
@@ -51,6 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
 
 
             square.appendChild(pieceElement);// the span is add to the square
+            
+            if(piece === 'king'){
+                kingposition[(row === 7? 'white' : 'black')] = {row, col};
+            }
+        
         }
         board.appendChild(square);;// the square with or without is a piece is add to the board
     };
@@ -101,6 +112,71 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
         }
         return false;
     };
+
+    const isKingInCheck = (color) => {
+        const kingposition = kingposition[color];
+        const opponentPieces = document.querySelectorAll(`.${color === 'white' ? 'black-piece' : 'white-piece'}`);
+
+        for (let piece of opponentPieces){
+            const fromRow = parentInt(piece.parentElement.dataset.row);
+            const fromCol = parentInt(piece,parentElement.da.col);
+            if(isValidMove(piece.innerHTML.trim(), fromRow,fromCol,kingposition.row, kingposition.col)){
+
+            }
+        
+            return false;
+    };
+
+    const getAllmoves = (color) => {
+        const allmoves = {};
+        const pieces = document.querySelectorAll(`.${color === 'white' ? 'white-piece' : 'black-piece'}`);
+
+        for(let piece of pieces){
+            const fromRow = parentInt(piece.parentElement.dataset.row);
+            const fromCol = parent(piece.parentElement.dataset.col);
+
+            for(let row =0; row < 8; row++){
+                for(let col = 0; col <8; col++){
+                    if (isValidMove(piece.innerHTML.trim(), fromRow,fromCol, row, col)){
+                        allmoves.push({fromRow, fromCol, toRow: row, toCol: col});
+                    }
+                }
+            }
+               
+        }
+        return allmoves;
+    };
+
+    const ischeckmate = color => {
+        if (! isKingInCheck(color)) return false;
+        const allmoves = getAllmoves(color);
+
+        for(let move of allmoves){
+            const pieceElement = document.querySelector(`[data-row="${move.fromRow}"][data-col="${move.fromCol}"] .piece`);
+            const targetSquare = document.querySelector(`[data-row="${move.toRow}"][data-col="${move.toCol}"]`);
+            const targetPiece = targetSquare.querySelector('.piece');
+
+            targetSquare.appendChild(pieceElement);// simulate the move
+            if(!isKingInCheck(color)){
+                targetSquare.innerHTML= '';// undo the move
+                if(targetPiece)targetSquare.appendChild(targetPiece); //Restore the capture piece
+            }
+            targetSquare.innerHTML = ''; // undo to move
+            if(targetPiece)targetSquare.appendChild(targetPiece);// restore the capture piece
+
+        }
+        return true;
+
+    };
+
+    const isStalemate = (color) => {
+        if(isKingInCheck(color)) 
+            return false;
+        const allmoves = getAllmoves(color);
+        return allmoves.length ===0; 
+    };
+
+    
  
     // drag and drop functionalities.  
     let draggedPiece = null;
@@ -134,6 +210,22 @@ document.addEventListener("DOMContentLoaded", () => {// set up an event listener
             if (draggedPiece && isValidMove(draggedPiece.innerHTML.trim(), fromRow, fromCol, toRow, toCol)) {
                 event.target.innerHTML = '';
                 event.target.appendChild(draggedPiece);
+
+                if (draggedPiece.innerHTML.trim() === pieces['king']){
+                    kingposition[draggedPiece.classList.contains('white-piece')? 'white': 'black'] = { row: toRow, col:toCol};
+                }
+
+                if(isKingInCheck(draggedPiece.classList.contains('white-piece')? 'black': 'white')){
+                    if(ischeckmate(draggedPiece.classList.contains('white-piece'))){
+                        alert('checkmate');
+                }else{
+                    alert('check');
+                }
+            }else if(isStalemate(draggedPiece.classList.contains('white-piece')? 'black' : ' white')){
+                alert('Stalemate!');
+            }
+
+
                 draggedPiece = null;
             } else {
                 alert('Invalid move');
