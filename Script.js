@@ -81,6 +81,11 @@ document.addEventListener("DOMContentLoaded", () => { // set up an event listene
      // Move validation function
     const isValidMove = (pieceUnicode, fromRow, fromCol, toRow, toCol) => {
         const piece = pieceMap[pieceUnicode]; // the pieceUnicode is the king symbole which is look up in the piecemap to find the coorect value nd assign it to peiace variabe.
+        
+        let hasKingMoved = {'white' : false, 'black': false};
+        let hasRookMoved = {'white' : {'left' : false, 'right': false}, 'black': {'left': false, 'right': false}};
+        
+        
         switch (piece) {
             case 'pawn': // Determine which way the pawn should go.
                 const direction = (fromRow < 4) ? 1 : -1;
@@ -109,10 +114,36 @@ document.addEventListener("DOMContentLoaded", () => { // set up an event listene
                     return true;
                 }
                 break;
+                
             case 'king':
                 if (Math.abs(fromRow - toRow) <= 1 && Math.abs(fromCol - toCol) <= 1) {
                     return true;
                 }
+            
+                //castling
+                if(!hasKingMoved[currentPlayer] && Math.abs(fromCol - toCol) === 2 && fromRow === toRow){
+                    const direction = (toCol > fromCol)? 1 : -1; // determine the direction of the castling
+                    const rookCol = (toCol > fromCol)? 7 : 0// Rook position
+
+                    //check if square b/t the king and rook are empty
+                    for( let col = fromCol + direction; col !== toCol;  col += direction){
+                        if(boarding.querySelector(`[data-row="${fromRow}"][data-col="${col}"] .piece`))
+                            returnfalse;
+                    }
+                
+                 }
+
+                //chck if the king is in, mving through, or moving into chck
+                if(isKingInCheck(currentPlayer)) return false;
+
+                // assuming iskingIncheck cover chcking all relevant squares the king passe trough
+                if(rookCol === 0) hasKingMoved[currentPlayer]['left'] = true;
+                else hasKingMoved[currentPlayer]['right'] = true;
+
+                return true;
+
+
+
                 break;
             default:
                 return false;
