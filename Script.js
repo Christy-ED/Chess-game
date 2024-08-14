@@ -54,21 +54,22 @@ document.addEventListener("DOMContentLoaded", () => { // set up an event listene
         // the symbole for the piece is place inside of the span using the pieces object. 
             pieceElement.className = 'piece';
             pieceElement.draggable = true;
+             
+             // determine the piece(span) color.
+             if (row === 0 || row === 1) {
+                pieceElement.classList.add('black-piece');
+            } else {
+                pieceElement.classList.add('white-piece');
+            }
 
-            const isBlack = row === 0 || row === 1;
-            pieceElement.classList.add(isBlack ? 'black-piece' : 'white-piece');
-
-
-            square.appendChild(pieceElement);// the span is add to the square.
-
+            square.appendChild(pieceElement);// the span is add to the square
 
             if (piece === 'king') {
-                kingPosition[isBlack ? 'black' : 'white'] = { row, col };
+                kingPosition[(row === 7 ? 'white' : 'black')] = { row, col };
             }
         }
-        board.appendChild(square); // the square with or without is a piece is add to the board.
+        board.appendChild(square);// the square with or without is a piece is add to the board
     };
-
 
      //  this nesed loop go through row and column of the chessboard adding the piece function at the position from the initialBoard array.
     for (let row = 0; row < 8; row++) {
@@ -206,53 +207,6 @@ document.addEventListener("DOMContentLoaded", () => { // set up an event listene
         event.preventDefault();
     });
 
-    document.addEventListener('drop', (event) => {
-        event.preventDefault();
-
-        if (event.target.classList.contains('black') || event.target.classList.contains('white')) {
-            const toRow = parseInt(event.target.dataset.row);
-            const toCol = parseInt(event.target.dataset.col);
-
-            if (draggedPiece && isValidMove(draggedPiece.innerHTML.trim(), fromRow, fromCol, toRow, toCol)) {
-                const targetSquare = document.querySelector(`[data-row="${toRow}"][data-col="${toCol}"]`);
-                const targetPiece = targetSquare.querySelector('.piece');
-
-                if (targetPiece &&
-                    ((draggedPiece.classList.contains('white-piece') && targetPiece.classList.contains('black-piece')) ||
-                        (draggedPiece.classList.contains('black-piece') && targetPiece.classList.contains('white-piece')))) {
-                    targetSquare.removeChild(targetPiece);
-                }
-
-                targetSquare.appendChild(draggedPiece);
-
-                if (draggedPiece.innerHTML.trim() === pieces['king']) {
-                    kingPosition[draggedPiece.classList.contains('white-piece') ? 'white' : 'black'] = { row: toRow, col: toCol };
-                }
-
-                if (isKingInCheck(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
-                    if (isCheckmate(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
-                        alert('Checkmate!');
-                    } else {
-                        alert('Check!');
-                    }
-                } else if (isStalemate(draggedPiece.classList.contains('white-piece') ? 'black' : 'white')) {
-                    alert('Stalemate!');
-                }
-
-                draggedPiece = null;
-
-                if (currentPlayer === 'white') {
-                    currentPlayer = 'black';
-                    setTimeout(makeAIMove, 500);
-                    currentPlayer = 'white';
-                }
-            } else {
-                alert('Invalid move');
-            }
-        }
-    });
-
-
     
     const makeAIMove = () => {
         const allMoves = getAllMoves('black'); // Get all possible moves for AI
@@ -348,7 +302,7 @@ document.addEventListener("DOMContentLoaded", () => { // set up an event listene
     
                 // Trigger AI move after player move
                 if (currentPlayer === 'white') {
-                    currentPlayer === 'black'; // AI's turn
+                    currentPlayer = 'black'; // AI's turn
                     setTimeout(makeAIMove, 500); // AI makes a move after a short delay
                     currentPlayer = 'white'; // Switch back to player
                 }
